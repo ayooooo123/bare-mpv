@@ -294,21 +294,5 @@ target_link_libraries(${bare_mpv} PRIVATE Threads::Threads)
 # C++17 for modern features
 set_target_properties(${bare_mpv} PROPERTIES CXX_STANDARD 17)
 
-# Strip debug symbols from the final .bare module in Release builds.
-# add_bare_module creates an OBJECT library — POST_BUILD commands are not
-# allowed on OBJECT libs, so we use a custom target that depends on it instead.
-if(CMAKE_BUILD_TYPE MATCHES "Release")
-  if(APPLE)
-    add_custom_target(bare_mpv_strip ALL
-      COMMAND strip -x $<TARGET_FILE:${bare_mpv}>
-      DEPENDS ${bare_mpv}
-      COMMENT "Stripping debug symbols from bare_mpv (macOS)"
-    )
-  elseif(UNIX)
-    add_custom_target(bare_mpv_strip ALL
-      COMMAND ${CMAKE_STRIP} --strip-debug --strip-unneeded $<TARGET_FILE:${bare_mpv}>
-      DEPENDS ${bare_mpv}
-      COMMENT "Stripping debug symbols from bare_mpv (Linux)"
-    )
-  endif()
-endif()
+# Debug symbol stripping is handled by -Db_strip=true (mpv/meson) and
+# --enable-stripping (ffmpeg) for Release builds. No post-build strip needed.
