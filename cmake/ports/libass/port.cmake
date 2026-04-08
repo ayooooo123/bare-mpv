@@ -50,6 +50,8 @@ list(APPEND env
   "PATH=${path}"
   "PKG_CONFIG=${pkg-config}"
   "PKG_CONFIG_PATH=${pkg_config_path}"
+  "FRIBIDI_CFLAGS= "
+  "FRIBIDI_LIBS= "
 )
 
 set(libass_args
@@ -58,7 +60,6 @@ set(libass_args
   --with-pic
   --disable-fontconfig
   --disable-fribidi
-  --enable-fribidi-fallback
   --disable-harfbuzz
   --disable-require-system-font-provider
 )
