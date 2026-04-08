@@ -66,6 +66,7 @@ set(pkg_config_path
   "${libplacebo_PREFIX}/lib/pkgconfig"
   "${freetype_PREFIX}/lib/pkgconfig"
   "${fribidi_PREFIX}/lib/pkgconfig"
+  "${harfbuzz_PREFIX}/lib/pkgconfig"
 )
 
 # libva/libdrm are system libs on Linux, pkg-config finds them automatically
@@ -264,6 +265,8 @@ target_link_libraries(
     placebo
     ass
     freetype
+    harfbuzz
+    fribidi
     avcodec
     avfilter
     avformat
