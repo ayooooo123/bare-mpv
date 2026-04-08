@@ -18,10 +18,9 @@ find_port(libass)
 find_port(libplacebo)
 find_port(ffmpeg FEATURES ${ffmpeg_features})
 
-if(LINUX)
-  find_port(libva)
-  find_port(libdrm)
-endif()
+# Use system libva/libdrm on Linux — building from source hits meson cross-build
+# pkg-config issues and is unnecessary since these are stable system ABI libs.
+# The workflow installs: libva-dev libdrm-dev libasound2-dev
 
 include(ExternalProject)
 
@@ -68,12 +67,7 @@ set(pkg_config_path
   "${freetype_PREFIX}/lib/pkgconfig"
 )
 
-if(LINUX)
-  list(APPEND pkg_config_path
-    "${libva_PREFIX}/lib/pkgconfig"
-    "${libdrm_PREFIX}/lib/pkgconfig"
-  )
-endif()
+# libva/libdrm are system libs on Linux, pkg-config finds them automatically
 
 list(REMOVE_DUPLICATES pkg_config_path)
 
