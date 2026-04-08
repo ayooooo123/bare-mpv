@@ -65,6 +65,7 @@ set(pkg_config_path
   "${libass_PREFIX}/lib/pkgconfig"
   "${libplacebo_PREFIX}/lib/pkgconfig"
   "${freetype_PREFIX}/lib/pkgconfig"
+  "${fribidi_PREFIX}/lib/pkgconfig"
 )
 
 # libva/libdrm are system libs on Linux, pkg-config finds them automatically

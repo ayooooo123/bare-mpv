@@ -3,93 +3,31 @@ include_guard(GLOBAL)
 find_port(freetype)
 find_port(fribidi)
 
-set(env)
-set(path)
-set(pkg_config_path
-  "${freetype_PREFIX}/lib/pkgconfig"
-  "${fribidi_PREFIX}/lib/pkgconfig"
-)
-
-if(CMAKE_HOST_WIN32)
-  find_path(
-    msys2
-    NAMES msys2.exe
-    PATHS "C:/tools/msys64"
-    REQUIRED
-  )
-
-  find_program(
-    pkg-config
-    NAMES pkg-config
-    PATHS "${msys2}/usr/bin"
-    REQUIRED
-    NO_DEFAULT_PATH
-  )
-
-  list(APPEND path "${msys2}/usr/bin")
-else()
-  find_program(
-    pkg-config
-    NAMES pkg-config
-    REQUIRED
-  )
-endif()
-
-foreach(part "$ENV{PATH}")
-  cmake_path(NORMAL_PATH part)
-
-  list(APPEND path "${part}")
-endforeach()
-
-list(REMOVE_DUPLICATES path)
-
-if(CMAKE_HOST_WIN32)
-  list(TRANSFORM path REPLACE "([A-Z]):" "/\\1")
-  list(TRANSFORM pkg_config_path REPLACE "([A-Z]):" "/\\1")
-endif()
-
-list(JOIN path ":" path)
-
-list(JOIN pkg_config_path ":" pkg_config_path_str)
-
-list(APPEND env
-  "PATH=${path}"
-  "PKG_CONFIG=${pkg-config}"
-  "PKG_CONFIG_PATH=${pkg_config_path_str}"
-)
-
-set(libass_args
-  --disable-shared
-  --enable-static
-  --with-pic
-  --disable-fontconfig
-  --disable-fribidi
-  --disable-harfbuzz
-  --disable-require-system-font-provider
-)
-
 declare_port(
-  "https://github.com/libass/libass/releases/download/0.17.1/libass-0.17.1.tar.xz"
+  "https://github.com/libass/libass/releases/download/0.17.3/libass-0.17.3.tar.gz"
   libass
-  AUTOTOOLS
+  MESON
   DEPENDS freetype fribidi
   BYPRODUCTS
     lib/libass.a
   ARGS
-    ${libass_args}
-  ENV ${env}
+    --default-library=static
+    -Dfontconfig=disabled
+    -Dfreetype=enabled
+    -Dfribidi=enabled
+    -Dharfbuzz=disabled
+    -Dtests=false
+    -Db_staticpic=true
 )
 
 add_library(ass STATIC IMPORTED GLOBAL)
 
 add_dependencies(ass ${libass})
 
-set(libass_lib "${libass_PREFIX}/lib/libass.a")
-
 set_target_properties(
   ass
   PROPERTIES
-  IMPORTED_LOCATION "${libass_lib}"
+  IMPORTED_LOCATION "${libass_PREFIX}/lib/libass.a"
 )
 
 file(MAKE_DIRECTORY "${libass_PREFIX}/include")
@@ -99,4 +37,4 @@ target_include_directories(
   INTERFACE "${libass_PREFIX}/include"
 )
 
-target_link_libraries(ass INTERFACE fribidi)
+target_link_libraries(ass INTERFACE freetype fribidi)

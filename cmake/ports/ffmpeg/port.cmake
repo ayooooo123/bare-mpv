@@ -375,11 +375,8 @@ if("opus" IN_LIST features)
 endif()
 
 if(LINUX)
-  find_port(libva)
-
+  # libva/libdrm are system libs — pkg-config finds them from the system prefix
   list(APPEND args --enable-vaapi)
-  list(APPEND pkg_config_path "${libva_PREFIX}/lib/pkgconfig")
-  list(APPEND pkg_config_path "${libdrm_PREFIX}/lib/pkgconfig")
 endif()
 
 if(CMAKE_HOST_WIN32)
