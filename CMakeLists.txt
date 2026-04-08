@@ -119,6 +119,7 @@ set(mpv_meson_args
   "${mpv_build_dir}"
   --buildtype ${buildtype}
   --default-library static
+  -Db_ndebug=true
   --prefix "${mpv_prefix}"
   --cross-file "${mpv_build_dir}/cross-file.txt"
 
@@ -171,6 +172,33 @@ if(LINUX)
   list(APPEND mpv_meson_args -Dpipewire=disabled)
   list(APPEND mpv_meson_args -Dalsa=enabled)
   list(APPEND mpv_meson_args -Db_staticpic=true)
+endif()
+
+if(ANDROID)
+  list(APPEND mpv_meson_args
+    -Dandroid-media-ndk=enabled
+    -Dopenal=disabled
+    -Djack=disabled
+    -Dpulse=disabled
+    -Dalsa=disabled
+    -Dsndio=disabled
+    -Daudiotrack=enabled
+    -Db_staticpic=true
+  )
+endif()
+
+if(IOS)
+  list(APPEND mpv_meson_args
+    -Dcocoa=disabled
+    -Dgl-cocoa=disabled
+    -Dmacos-cocoa-cb=disabled
+    -Dios-gl=enabled
+    -Db_staticpic=true
+  )
+endif()
+
+if(CMAKE_BUILD_TYPE MATCHES "Release")
+  list(APPEND mpv_meson_args -Db_strip=true)
 endif()
 
 ExternalProject_Add(
@@ -265,3 +293,18 @@ target_link_libraries(${bare_mpv} PRIVATE Threads::Threads)
 
 # C++17 for modern features
 set_target_properties(${bare_mpv} PROPERTIES CXX_STANDARD 17)
+
+# Strip debug symbols from the final .bare module in Release builds
+if(CMAKE_BUILD_TYPE MATCHES "Release")
+  if(APPLE)
+    add_custom_command(TARGET ${bare_mpv} POST_BUILD
+      COMMAND strip -x $<TARGET_FILE:${bare_mpv}>
+      COMMENT "Stripping debug symbols from bare_mpv (macOS)"
+    )
+  elseif(UNIX)
+    add_custom_command(TARGET ${bare_mpv} POST_BUILD
+      COMMAND ${CMAKE_STRIP} --strip-debug --strip-unneeded $<TARGET_FILE:${bare_mpv}>
+      COMMENT "Stripping debug symbols from bare_mpv (Linux)"
+    )
+  endif()
+endif()

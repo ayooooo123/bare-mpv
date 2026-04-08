@@ -15,7 +15,8 @@
     "bare-make": "^1.7.2",
     "cmake-bare": "^1.7.6",
     "cmake-meson": "^1.1.0",
-    "cmake-ports": "^1.5.10"
+    "cmake-ports": "^1.5.10",
+    "cmake-zig": "^1.0.0"
   },
   "engines": {
     "bare": ">=2.0.0"

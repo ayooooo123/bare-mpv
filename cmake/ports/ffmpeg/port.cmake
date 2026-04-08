@@ -2,7 +2,6 @@ include_guard(GLOBAL)
 
 set(libraries
   avcodec
-  avdevice
   avfilter
   avformat
   avutil
@@ -23,14 +22,109 @@ set(args
   --disable-autodetect
   --disable-doc
   --disable-programs
-  --enable-network
+  --disable-encoders
+  --disable-muxers
+  --disable-avdevice
+  --disable-filters
+  --disable-postproc
 
+  # Protocols: only what's needed for file + network playback
+  --disable-protocols
+  --enable-protocol=file
+  --enable-protocol=http
+  --enable-protocol=https
+  --enable-protocol=tcp
+  --enable-protocol=udp
+  --enable-protocol=pipe
+  --enable-protocol=crypto
+  --enable-protocol=data
+
+  # Demuxers: keep common containers
+  --enable-demuxer=matroska
+  --enable-demuxer=mp4
+  --enable-demuxer=mov
+  --enable-demuxer=avi
+  --enable-demuxer=mpegts
+  --enable-demuxer=flv
+  --enable-demuxer=ogg
+  --enable-demuxer=webm
+  --enable-demuxer=wav
+  --enable-demuxer=mp3
+  --enable-demuxer=aac
+  --enable-demuxer=flac
+  --enable-demuxer=hevc
+  --enable-demuxer=h264
+  --enable-demuxer=concat
+  --enable-demuxer=image2
+  --enable-demuxer=hls
+
+  # Decoders: video + audio playback only
+  --enable-decoder=h264
+  --enable-decoder=hevc
+  --enable-decoder=vp8
+  --enable-decoder=vp9
+  --enable-decoder=av1
+  --enable-decoder=mpeg4
+  --enable-decoder=mpeg2video
+  --enable-decoder=theora
+  --enable-decoder=aac
+  --enable-decoder=ac3
+  --enable-decoder=eac3
+  --enable-decoder=mp3
+  --enable-decoder=mp2
+  --enable-decoder=vorbis
+  --enable-decoder=opus
+  --enable-decoder=flac
+  --enable-decoder=pcm_s16le
+  --enable-decoder=pcm_s16be
+  --enable-decoder=pcm_s24le
+  --enable-decoder=pcm_f32le
+  --enable-decoder=dts
+  --enable-decoder=truehd
+  --enable-decoder=ass
+  --enable-decoder=ssa
+  --enable-decoder=srt
+  --enable-decoder=subrip
+  --enable-decoder=webvtt
+  --enable-decoder=dvdsub
+  --enable-decoder=dvbsub
+  --enable-decoder=hdmv_pgs_subtitle
+  --enable-decoder=png
+  --enable-decoder=mjpeg
+  --enable-decoder=bmp
+
+  # Parsers needed for the above codecs
+  --enable-parser=h264
+  --enable-parser=hevc
+  --enable-parser=vp8
+  --enable-parser=vp9
+  --enable-parser=av1
+  --enable-parser=mpeg4video
+  --enable-parser=aac
+  --enable-parser=ac3
+  --enable-parser=dca
+  --enable-parser=mp3
+  --enable-parser=vorbis
+  --enable-parser=opus
+  --enable-parser=flac
+  --enable-parser=png
+  --enable-parser=mjpeg
+
+  # BSF needed for some containers
+  --enable-bsf=h264_mp4toannexb
+  --enable-bsf=hevc_mp4toannexb
+  --enable-bsf=aac_adtstoasc
+  --enable-bsf=extract_extradata
+  --enable-bsf=dump_extradata
+  --enable-bsf=noise
+
+  --enable-network
   --enable-pic
   --enable-cross-compile
 )
 
 if(CMAKE_BUILD_TYPE MATCHES "Release")
-  list(APPEND args --disable-debug)
+  list(APPEND args --disable-debug --enable-stripping)
 elseif(CMAKE_BUILD_TYPE MATCHES "Debug")
   list(APPEND args --disable-optimizations)
 elseif(CMAKE_BUILD_TYPE MATCHES "MinSizeRel")
@@ -97,6 +191,15 @@ elseif(ANDROID)
 
     --enable-jni
     --enable-mediacodec
+  )
+
+  list(APPEND args
+    --enable-decoder=h264_mediacodec
+    --enable-decoder=hevc_mediacodec
+    --enable-decoder=vp8_mediacodec
+    --enable-decoder=vp9_mediacodec
+    --enable-decoder=av1_mediacodec
+    --enable-decoder=mpeg4_mediacodec
   )
 
   if(arch MATCHES "x86_32")
@@ -373,17 +476,6 @@ target_link_libraries(
 )
 
 target_link_libraries(
-  avdevice
-  INTERFACE
-    avcodec
-    avfilter
-    avformat
-    avutil
-    swresample
-    swscale
-)
-
-target_link_libraries(
   avfilter
   INTERFACE
     avcodec
@@ -425,17 +517,6 @@ if(APPLE)
   )
 
   target_link_libraries(
-    avdevice
-    INTERFACE
-      "-framework AVFoundation"
-      "-framework CoreAudio"
-      "-framework CoreGraphics"
-      "-framework CoreMedia"
-      "-framework CoreVideo"
-      "-framework Foundation"
-  )
-
-  target_link_libraries(
     avutil
     INTERFACE
       "-framework VideoToolbox"
@@ -452,25 +533,12 @@ if(APPLE)
         "-framework AudioToolbox"
     )
 
-    target_link_libraries(
-      avdevice
-      INTERFACE
-        "-framework AudioToolbox"
-    )
   endif()
 elseif(ANDROID)
   target_link_libraries(
     avcodec
     INTERFACE
       android
-      mediandk
-  )
-
-  target_link_libraries(
-    avdevice
-    INTERFACE
-      android
-      camera2ndk
       mediandk
   )
 
@@ -489,19 +557,6 @@ elseif(WIN32)
       ole32
       strmiids
       user32
-  )
-
-  target_link_libraries(
-    avdevice
-    INTERFACE
-      gdi32
-      ole32
-      oleaut32
-      psapi
-      shlwapi
-      strmiids
-      uuid
-      vfw32
   )
 
   target_link_libraries(
