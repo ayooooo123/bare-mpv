@@ -1,10 +1,14 @@
 include_guard(GLOBAL)
 
 find_port(freetype)
+find_port(fribidi)
 
 set(env)
 set(path)
-set(pkg_config_path "${freetype_PREFIX}/lib/pkgconfig")
+set(pkg_config_path
+  "${freetype_PREFIX}/lib/pkgconfig"
+  "${fribidi_PREFIX}/lib/pkgconfig"
+)
 
 if(CMAKE_HOST_WIN32)
   find_path(
@@ -46,12 +50,12 @@ endif()
 
 list(JOIN path ":" path)
 
+list(JOIN pkg_config_path ":" pkg_config_path_str)
+
 list(APPEND env
   "PATH=${path}"
   "PKG_CONFIG=${pkg-config}"
-  "PKG_CONFIG_PATH=${pkg_config_path}"
-  "FRIBIDI_CFLAGS= "
-  "FRIBIDI_LIBS= "
+  "PKG_CONFIG_PATH=${pkg_config_path_str}"
 )
 
 set(libass_args
@@ -64,13 +68,11 @@ set(libass_args
   --disable-require-system-font-provider
 )
 
-
-
 declare_port(
   "https://github.com/libass/libass/releases/download/0.17.1/libass-0.17.1.tar.xz"
   libass
   AUTOTOOLS
-  DEPENDS freetype
+  DEPENDS freetype fribidi
   BYPRODUCTS
     lib/libass.a
   ARGS
@@ -96,3 +98,5 @@ target_include_directories(
   ass
   INTERFACE "${libass_PREFIX}/include"
 )
+
+target_link_libraries(ass INTERFACE fribidi)
