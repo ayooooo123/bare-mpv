@@ -10,10 +10,11 @@ declare_port(
   DEPENDS freetype fribidi
   BYPRODUCTS
     lib/libass.a
+  ENV
+    "PKG_CONFIG_PATH=${fribidi_PREFIX}/lib/pkgconfig:${freetype_PREFIX}/lib/pkgconfig"
   ARGS
     --default-library=static
     -Dfontconfig=disabled
-    -Dfreetype=enabled
     -Dfribidi=enabled
     -Dharfbuzz=disabled
     -Dtests=false
