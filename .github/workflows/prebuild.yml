@@ -104,14 +104,14 @@ jobs:
       - run: npm install
 
       - name: Generate
-        run: bare-make generate --platform ${{ matrix.platform }} --arch ${{ matrix.arch }} ${{ matrix.flags }} --release
+        run: bare-make generate --platform ${{ matrix.platform }} --arch ${{ matrix.arch }} ${{ matrix.flags }}
 
       - name: Build
-        run: bare-make build --release
+        run: bare-make build
         timeout-minutes: 90
 
       - name: Install
-        run: bare-make install --release
+        run: bare-make install
 
       - uses: actions/upload-artifact@v4
         with:
