@@ -58,14 +58,12 @@ set(libass_args
   --with-pic
   --disable-fontconfig
   --disable-fribidi
+  --enable-fribidi-fallback
   --disable-harfbuzz
+  --disable-require-system-font-provider
 )
 
-# On Linux, there's no system font provider (DirectWrite on Windows, CoreText on macOS)
-# so we need to explicitly disable the requirement
-if(LINUX)
-  list(APPEND libass_args --disable-require-system-font-provider)
-endif()
+
 
 declare_port(
   "https://github.com/libass/libass/releases/download/0.17.1/libass-0.17.1.tar.xz"

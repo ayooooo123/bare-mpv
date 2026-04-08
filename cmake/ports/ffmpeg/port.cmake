@@ -26,7 +26,6 @@ set(args
   --disable-muxers
   --disable-avdevice
   --disable-filters
-  --disable-postproc
 
   # Protocols
   --disable-protocols
