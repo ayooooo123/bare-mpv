@@ -56,7 +56,7 @@ declare_port(
     --disable-shared
     --enable-static
     --with-pic
-    --disable-docs
+    --disable-documentation
   ENV ${env}
 )
 
