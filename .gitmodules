@@ -1,0 +1,4 @@
+[submodule "vendor/mpv"]
+	path = vendor/mpv
+	url = https://github.com/mpv-player/mpv.git
+	branch = master
