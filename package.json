@@ -1,6 +1,7 @@
 {
   "name": "bare-mpv",
   "version": "0.1.0",
+  "addon": true,
   "description": "Bare native addon for libmpv video playback",
   "main": "index.js",
   "scripts": {

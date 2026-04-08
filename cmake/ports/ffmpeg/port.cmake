@@ -28,7 +28,7 @@ set(args
   --disable-filters
   --disable-postproc
 
-  # Protocols: only what's needed for file + network playback
+  # Protocols
   --disable-protocols
   --enable-protocol=file
   --enable-protocol=http
@@ -39,7 +39,7 @@ set(args
   --enable-protocol=crypto
   --enable-protocol=data
 
-  # Demuxers: keep common containers
+  # Demuxers
   --enable-demuxer=matroska
   --enable-demuxer=mp4
   --enable-demuxer=mov
@@ -58,7 +58,7 @@ set(args
   --enable-demuxer=image2
   --enable-demuxer=hls
 
-  # Decoders: video + audio playback only
+  # Decoders
   --enable-decoder=h264
   --enable-decoder=hevc
   --enable-decoder=vp8
@@ -93,7 +93,7 @@ set(args
   --enable-decoder=mjpeg
   --enable-decoder=bmp
 
-  # Parsers needed for the above codecs
+  # Parsers
   --enable-parser=h264
   --enable-parser=hevc
   --enable-parser=vp8
@@ -110,7 +110,7 @@ set(args
   --enable-parser=png
   --enable-parser=mjpeg
 
-  # BSF needed for some containers
+  # BSF
   --enable-bsf=h264_mp4toannexb
   --enable-bsf=hevc_mp4toannexb
   --enable-bsf=aac_adtstoasc
