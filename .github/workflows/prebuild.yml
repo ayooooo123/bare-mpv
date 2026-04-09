@@ -88,6 +88,9 @@ jobs:
           bare-make build
           bare-make install --prefix prebuilds
 
+      - name: Show prebuild sizes
+        run: find prebuilds -name "*.bare" -exec ls -lh {} \;
+
       - uses: holepunchto/actions/upload-prebuilds@v1
         with:
           platform: ${{ matrix.platform }}
