@@ -81,13 +81,18 @@ jobs:
       - run: npm install -g bare-make
       - run: npm install
 
-      - uses: holepunchto/actions/compile-prebuilds@v1
+      - name: Build prebuilds (fresh, no cache)
+        run: |
+          bare-make generate --platform ${{ matrix.platform }} --arch ${{ matrix.arch }} ${{ matrix.flags }} --fresh
+          bare-make build
+          bare-make install --prefix prebuilds
+
+      - uses: holepunchto/actions/upload-prebuilds@v1
         with:
           platform: ${{ matrix.platform }}
           arch: ${{ matrix.arch }}
-          flags: ${{ matrix.flags }}
           tags: ${{ matrix.tags }}
-          upload: true
+          prefix: prebuilds
 
   merge:
     runs-on: ubuntu-latest
