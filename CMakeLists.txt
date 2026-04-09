@@ -218,6 +218,15 @@ if(CMAKE_BUILD_TYPE MATCHES "Release" OR CMAKE_BUILD_TYPE MATCHES "MinSizeRel")
   list(APPEND mpv_meson_args -Db_lto=true -Db_lto_mode=thin)
 endif()
 
+# Hide all mpv symbols — statically linked into .bare, nothing should be public.
+# c_visibility_preset / cpp_visibility_preset are meson's equivalent of -fvisibility=hidden.
+if(NOT WIN32)
+  list(APPEND mpv_meson_args
+    -Dc_visibility_preset=hidden
+    -Dcpp_visibility_preset=hidden
+  )
+endif()
+
 ExternalProject_Add(
   mpv_ext
   PREFIX "${mpv_prefix}"
@@ -315,6 +324,26 @@ target_link_libraries(${bare_mpv} PRIVATE Threads::Threads)
 
 # C++17 for modern features
 set_target_properties(${bare_mpv} PROPERTIES CXX_STANDARD 17)
+
+# Symbol visibility: hide everything except the two bare module entry points.
+# This lets the linker/LTO treat all internal symbols as dead-code candidates.
+# The bare runtime loads modules by dlsym("bare_get_module_name_v0") and
+# dlsym("bare_register_module_v0") — those two must stay public, nothing else.
+if(NOT WIN32)
+  target_compile_options(${bare_mpv} PRIVATE -fvisibility=hidden)
+
+  if(APPLE)
+    # ld64: -exported_symbols_list keeps only the listed symbols public.
+    target_link_options(${bare_mpv}_module PRIVATE
+      -Wl,-exported_symbols_list,${CMAKE_CURRENT_SOURCE_DIR}/cmake/bare-mpv.exported_symbols
+    )
+  else()
+    # lld/ld: version script — symbols not in "global:" become local (hidden).
+    target_link_options(${bare_mpv}_module PRIVATE
+      -Wl,--version-script,${CMAKE_CURRENT_SOURCE_DIR}/cmake/bare-mpv.version
+    )
+  endif()
+endif()
 
 # Strip the final .bare binary in Release builds
 # Use cmake -P script at install time to avoid generator expression issues with bare module targets

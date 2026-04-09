@@ -18,6 +18,11 @@ if(CMAKE_C_COMPILER_TARGET)
   string(APPEND libass_ldflags " --target=${CMAKE_C_COMPILER_TARGET}")
 endif()
 
+# Hide all symbols — statically linked into .bare, none should be public
+if(NOT WIN32)
+  string(APPEND libass_cflags " -fvisibility=hidden")
+endif()
+
 if(CMAKE_SYSROOT)
   string(APPEND libass_cflags " --sysroot=${CMAKE_SYSROOT}")
   string(APPEND libass_ldflags " --sysroot=${CMAKE_SYSROOT}")

@@ -10,6 +10,14 @@ if(LINUX)
   list(APPEND dav1d_args -Db_staticpic=true)
 endif()
 
+# Hide all symbols — statically linked into .bare, none should be public
+if(NOT WIN32)
+  list(APPEND dav1d_args
+    -Dc_visibility_preset=hidden
+    -Dcpp_visibility_preset=hidden
+  )
+endif()
+
 declare_port(
   "git:code.videolan.org/videolan/dav1d#1.5.1"
   dav1d
