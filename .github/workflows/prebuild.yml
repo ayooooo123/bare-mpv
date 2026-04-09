@@ -83,7 +83,8 @@ jobs:
 
       - name: Build prebuilds (fresh, no cache)
         run: |
-          bare-make generate --platform ${{ matrix.platform }} --arch ${{ matrix.arch }} ${{ matrix.flags }} --fresh
+          rm -rf build
+          bare-make generate --platform ${{ matrix.platform }} --arch ${{ matrix.arch }} ${{ matrix.flags }}
           bare-make build
           bare-make install --prefix prebuilds
 
