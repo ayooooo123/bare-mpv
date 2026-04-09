@@ -110,8 +110,20 @@ jobs:
 
       - name: UPX compress Linux and Android prebuilds
         run: |
-          find prebuilds/ \( -path '*/linux-*/*.bare' -o -path '*/android-*/*.bare' \) | \
-            xargs -r upx --best --lzma
+          # Linux: .bare is a shared lib — chmod +x + --force-execve needed.
+          # Try lzma first (best ratio), fall back to --best if lzma fails.
+          find prebuilds/ -path '*/linux-*/*.bare' | while read f; do
+            chmod +x "$f"
+            upx --best --lzma --force-execve "$f" \
+              || upx --best --force-execve "$f" \
+              || echo "UPX skipped $f"
+          done
+          # Android: use --android-shlib flag for NDK shared libraries
+          find prebuilds/ -path '*/android-*/*.bare' | while read f; do
+            upx --best --lzma --android-shlib "$f" \
+              || upx --best --android-shlib "$f" \
+              || echo "UPX skipped $f"
+          done
           echo "Sizes after UPX:"
           find prebuilds/ -name '*.bare' | sort | xargs ls -lh
 
