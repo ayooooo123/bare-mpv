@@ -27,7 +27,7 @@ set(args
   --disable-avdevice
   --disable-filters
 
-  # Protocols
+  # Protocols — keep only what PearTube needs (P2P file/network playback)
   --disable-protocols
   --enable-protocol=file
   --enable-protocol=http
@@ -38,84 +38,53 @@ set(args
   --enable-protocol=crypto
   --enable-protocol=data
 
-  # Demuxers
-  --enable-demuxer=matroska
-  --enable-demuxer=mp4
-  --enable-demuxer=mov
-  --enable-demuxer=avi
-  --enable-demuxer=mpegts
-  --enable-demuxer=flv
-  --enable-demuxer=ogg
-  --enable-demuxer=webm
-  --enable-demuxer=wav
-  --enable-demuxer=mp3
-  --enable-demuxer=aac
-  --enable-demuxer=flac
-  --enable-demuxer=hevc
-  --enable-demuxer=h264
-  --enable-demuxer=concat
-  --enable-demuxer=image2
-  --enable-demuxer=hls
+  # Demuxers — modern streaming containers only; cut legacy (AVI, FLV, MPEG-TS, image2, raw ES)
+  --enable-demuxer=matroska   # MKV/WebM
+  --enable-demuxer=mp4        # MP4
+  --enable-demuxer=mov        # MOV (same family as MP4)
+  --enable-demuxer=ogg        # OGG (Opus/Vorbis audio)
+  --enable-demuxer=webm       # WebM (alias for matroska, kept for clarity)
+  --enable-demuxer=mp3        # MP3 audio
+  --enable-demuxer=aac        # AAC audio
+  --enable-demuxer=flac       # FLAC audio
+  --enable-demuxer=hls        # HLS streaming
+  --enable-demuxer=concat     # concat demuxer (mpv uses internally)
 
-  # Decoders
+  # Decoders — modern codecs only; cut legacy (MPEG2, MPEG4/Xvid, Theora, VP8,
+  #             surround audio, image formats, DVD/BD/DVB subtitles)
+  # Video
   --enable-decoder=h264
   --enable-decoder=hevc
-  --enable-decoder=vp8
   --enable-decoder=vp9
   --enable-decoder=av1
-  --enable-decoder=mpeg4
-  --enable-decoder=mpeg2video
-  --enable-decoder=theora
+  # Audio
   --enable-decoder=aac
-  --enable-decoder=ac3
-  --enable-decoder=eac3
   --enable-decoder=mp3
-  --enable-decoder=mp2
   --enable-decoder=vorbis
   --enable-decoder=opus
   --enable-decoder=flac
-  --enable-decoder=pcm_s16le
-  --enable-decoder=pcm_s16be
-  --enable-decoder=pcm_s24le
-  --enable-decoder=pcm_f32le
-  --enable-decoder=dts
-  --enable-decoder=truehd
+  # Subtitles — web formats only
   --enable-decoder=ass
   --enable-decoder=ssa
   --enable-decoder=srt
   --enable-decoder=subrip
   --enable-decoder=webvtt
-  --enable-decoder=dvdsub
-  --enable-decoder=dvbsub
-  --enable-decoder=hdmv_pgs_subtitle
-  --enable-decoder=png
-  --enable-decoder=mjpeg
-  --enable-decoder=bmp
 
-  # Parsers
+  # Parsers — match enabled decoders
   --enable-parser=h264
   --enable-parser=hevc
-  --enable-parser=vp8
   --enable-parser=vp9
   --enable-parser=av1
-  --enable-parser=mpeg4video
   --enable-parser=aac
-  --enable-parser=ac3
-  --enable-parser=dca
   --enable-parser=mp3
   --enable-parser=vorbis
   --enable-parser=opus
   --enable-parser=flac
-  --enable-parser=png
-  --enable-parser=mjpeg
 
-  # BSF
+  # BSF — essential bitstream filters only
   --enable-bsf=h264_mp4toannexb
   --enable-bsf=hevc_mp4toannexb
   --enable-bsf=aac_adtstoasc
-  --enable-bsf=extract_extradata
-  --enable-bsf=dump_extradata
-  --enable-bsf=noise
 
   --enable-network
   --enable-pic
@@ -123,7 +92,7 @@ set(args
 )
 
 if(CMAKE_BUILD_TYPE MATCHES "Release")
-  list(APPEND args --disable-debug --enable-stripping --enable-small)
+  list(APPEND args --disable-debug --enable-stripping)
 elseif(CMAKE_BUILD_TYPE MATCHES "Debug")
   list(APPEND args --disable-optimizations)
 elseif(CMAKE_BUILD_TYPE MATCHES "MinSizeRel")
@@ -225,10 +194,8 @@ elseif(ANDROID)
   list(APPEND args
     --enable-decoder=h264_mediacodec
     --enable-decoder=hevc_mediacodec
-    --enable-decoder=vp8_mediacodec
     --enable-decoder=vp9_mediacodec
     --enable-decoder=av1_mediacodec
-    --enable-decoder=mpeg4_mediacodec
   )
 
   if(arch MATCHES "x86_32")

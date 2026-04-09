@@ -64,14 +64,14 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y ninja-build nasm python3 python3-pip pkgconf \
             libva-dev libdrm-dev libasound2-dev \
-            clang lld
+            clang lld upx-ucl
           sudo pip3 install meson --upgrade
 
       - name: Install deps (Android)
         if: matrix.platform == 'android'
         run: |
           sudo apt-get update
-          sudo apt-get install -y ninja-build nasm python3 python3-pip pkgconf
+          sudo apt-get install -y ninja-build nasm python3 python3-pip pkgconf upx-ucl
           sudo pip3 install meson --upgrade
 
       - name: Install deps (macOS / iOS)
@@ -104,6 +104,16 @@ jobs:
         with:
           name: prebuilds
           path: prebuilds
+
+      - name: Install UPX
+        run: sudo apt-get install -y upx-ucl
+
+      - name: UPX compress Linux and Android prebuilds
+        run: |
+          find prebuilds/ \( -path '*/linux-*/*.bare' -o -path '*/android-*/*.bare' \) | \
+            xargs -r upx --best --lzma
+          echo "Sizes after UPX:"
+          find prebuilds/ -name '*.bare' | sort | xargs ls -lh
 
       - name: Commit prebuilds
         run: |
