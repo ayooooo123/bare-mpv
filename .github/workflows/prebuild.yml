@@ -76,7 +76,7 @@ jobs:
 
       - name: Install deps (macOS / iOS)
         if: runner.os == 'macOS'
-        run: brew install meson nasm pkg-config ninja
+        run: brew install meson nasm pkg-config ninja automake autoconf
 
       - run: npm install -g bare-make
       - run: npm install
