@@ -123,11 +123,11 @@ set(args
 )
 
 if(CMAKE_BUILD_TYPE MATCHES "Release")
-  list(APPEND args --disable-debug --enable-stripping --enable-lto --enable-small)
+  list(APPEND args --disable-debug --enable-stripping --enable-small)
 elseif(CMAKE_BUILD_TYPE MATCHES "Debug")
   list(APPEND args --disable-optimizations)
 elseif(CMAKE_BUILD_TYPE MATCHES "MinSizeRel")
-  list(APPEND args --disable-debug --enable-stripping --enable-lto --enable-small)
+  list(APPEND args --disable-debug --enable-stripping --enable-small)
 endif()
 
 if(APPLE AND CMAKE_OSX_ARCHITECTURES)

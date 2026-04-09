@@ -116,8 +116,6 @@ set(mpv_meson_args
   --buildtype ${buildtype}
   --default-library static
   -Db_ndebug=true
-  -Db_lto=true
-  -Db_lto_mode=thin
   --prefix "${mpv_prefix}"
   --cross-file "${mpv_build_dir}/cross-file.txt"
 
@@ -299,14 +297,19 @@ target_link_libraries(${bare_mpv} PRIVATE Threads::Threads)
 # C++17 for modern features
 set_target_properties(${bare_mpv} PROPERTIES CXX_STANDARD 17)
 
-# Strip the final .bare binary in Release builds
+# Strip the final .bare binary in Release builds via a custom target
+# (bare_mpv is an OBJECT library — POST_BUILD not allowed, use add_custom_target instead)
 if(CMAKE_BUILD_TYPE MATCHES "Release" OR CMAKE_BUILD_TYPE MATCHES "MinSizeRel")
   find_program(STRIP_TOOL NAMES llvm-strip strip)
   if(STRIP_TOOL)
-    add_custom_command(TARGET ${bare_mpv} POST_BUILD
-      COMMAND ${STRIP_TOOL}
-        $<IF:$<PLATFORM_ID:Darwin>,--strip-all,-x>
-        $<TARGET_FILE:${bare_mpv}>
+    if(APPLE)
+      set(strip_flags --strip-all)
+    else()
+      set(strip_flags -x)
+    endif()
+    add_custom_target(strip_bare ALL
+      COMMAND ${STRIP_TOOL} ${strip_flags} $<TARGET_FILE:${bare_mpv}>
+      DEPENDS ${bare_mpv}
       COMMENT "Stripping debug symbols from $<TARGET_FILE_NAME:${bare_mpv}>"
     )
   endif()
