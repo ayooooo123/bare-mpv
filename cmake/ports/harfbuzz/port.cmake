@@ -21,11 +21,11 @@ declare_port(
     -Dicu=disabled
     -Dgraphite=disabled
     -Dgraphite2=disabled
-    -Dtests=disabled
+    -Dtests=false
     -Dintrospection=disabled
-    -Ddocs=disabled
-    -Dutilities=disabled
-    -Dbenchmark=disabled
+    -Ddocs=false
+    -Dutilities=false
+    -Dbenchmark=false
     -Db_staticpic=true
 )
 
