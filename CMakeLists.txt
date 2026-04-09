@@ -172,13 +172,13 @@ endif()
 
 if(ANDROID)
   list(APPEND mpv_meson_args
-    -Dandroid-media-ndk=enabled
+    -Dandroid-media-ndk=auto
     -Dopenal=disabled
     -Djack=disabled
     -Dpulse=disabled
     -Dalsa=disabled
     -Dsndio=disabled
-    -Daudiotrack=enabled
+    -Daudiotrack=auto
     -Db_staticpic=true
   )
 endif()
@@ -188,7 +188,7 @@ if(IOS)
     -Dcocoa=disabled
     -Dgl-cocoa=disabled
     -Dmacos-cocoa-cb=disabled
-    -Dios-gl=enabled
+    -Dios-gl=auto
     -Db_staticpic=true
   )
 endif()
