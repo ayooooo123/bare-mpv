@@ -2,6 +2,33 @@ include_guard(GLOBAL)
 
 find_port(freetype)
 
+set(harfbuzz_args
+  -DBUILD_SHARED_LIBS=OFF
+  -DCMAKE_POSITION_INDEPENDENT_CODE=ON
+  -DHB_HAVE_FREETYPE=ON
+  -DCMAKE_PREFIX_PATH=${freetype_PREFIX}
+  -DFREETYPE_INCLUDE_DIR=${freetype_PREFIX}/include/freetype2
+  -DFREETYPE_INCLUDE_DIRS=${freetype_PREFIX}/include/freetype2
+  -DFREETYPE_LIBRARY=${freetype_PREFIX}/lib/libfreetype.a
+  -DFREETYPE_LIBRARIES=${freetype_PREFIX}/lib/libfreetype.a
+  -DHB_BUILD_TESTS=OFF
+  -DHB_BUILD_UTILS=OFF
+  -DHB_BUILD_SUBSET=OFF
+  -DHB_HAVE_GLIB=OFF
+  -DHB_HAVE_GOBJECT=OFF
+  -DHB_HAVE_ICU=OFF
+  -DHB_HAVE_GRAPHITE2=OFF
+  -DHB_HAVE_INTROSPECTION=OFF
+)
+
+# Hide all symbols — statically linked into .bare, none should be public
+if(NOT WIN32)
+  list(APPEND harfbuzz_args
+    "-DCMAKE_C_FLAGS=-fvisibility=hidden"
+    "-DCMAKE_CXX_FLAGS=-fvisibility=hidden"
+  )
+endif()
+
 declare_port(
   "https://github.com/harfbuzz/harfbuzz/releases/download/9.0.0/harfbuzz-9.0.0.tar.xz"
   harfbuzz
@@ -10,22 +37,7 @@ declare_port(
   BYPRODUCTS
     lib/libharfbuzz.a
   ARGS
-    -DBUILD_SHARED_LIBS=OFF
-    -DCMAKE_POSITION_INDEPENDENT_CODE=ON
-    -DHB_HAVE_FREETYPE=ON
-    -DCMAKE_PREFIX_PATH=${freetype_PREFIX}
-    -DFREETYPE_INCLUDE_DIR=${freetype_PREFIX}/include/freetype2
-    -DFREETYPE_INCLUDE_DIRS=${freetype_PREFIX}/include/freetype2
-    -DFREETYPE_LIBRARY=${freetype_PREFIX}/lib/libfreetype.a
-    -DFREETYPE_LIBRARIES=${freetype_PREFIX}/lib/libfreetype.a
-    -DHB_BUILD_TESTS=OFF
-    -DHB_BUILD_UTILS=OFF
-    -DHB_BUILD_SUBSET=OFF
-    -DHB_HAVE_GLIB=OFF
-    -DHB_HAVE_GOBJECT=OFF
-    -DHB_HAVE_ICU=OFF
-    -DHB_HAVE_GRAPHITE2=OFF
-    -DHB_HAVE_INTROSPECTION=OFF
+    ${harfbuzz_args}
 )
 
 add_library(harfbuzz STATIC IMPORTED GLOBAL)

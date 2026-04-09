@@ -130,6 +130,12 @@ elseif(CMAKE_BUILD_TYPE MATCHES "MinSizeRel")
   list(APPEND args --disable-debug --enable-stripping --enable-small)
 endif()
 
+# Hide all FFmpeg symbols — they get statically linked into the .bare shared lib
+# and should not be visible externally. Required for LTO dead code elimination.
+if(NOT WIN32)
+  list(APPEND args --extra-cflags=-fvisibility=hidden)
+endif()
+
 # LTO: enable for Release/MinSizeRel on platforms where it's safe for cross-compile.
 # - Apple (darwin/ios): ld64 has built-in LTO support via libLTO.dylib — always works.
 # - Android: NDK ships lld which supports LTO — always works.

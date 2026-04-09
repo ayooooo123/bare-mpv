@@ -22,6 +22,14 @@ if(LINUX)
   list(APPEND libplacebo_args -Db_staticpic=true)
 endif()
 
+# Hide all symbols — statically linked into .bare, none should be public
+if(NOT WIN32)
+  list(APPEND libplacebo_args
+    -Dc_visibility_preset=hidden
+    -Dcpp_visibility_preset=hidden
+  )
+endif()
+
 declare_port(
   "git:code.videolan.org/videolan/libplacebo#master"
   libplacebo
