@@ -430,8 +430,9 @@ list(APPEND env
   "PKG_CONFIG_PATH=${pkg_config_path}"
 )
 
+# cache-bust: slim-codecs-v2
 declare_port(
-  "github:FFmpeg/FFmpeg#n8.0.0"
+  "github:FFmpeg/FFmpeg#n8.0"
   ffmpeg
   AUTOTOOLS
   DEPENDS ${depends}
