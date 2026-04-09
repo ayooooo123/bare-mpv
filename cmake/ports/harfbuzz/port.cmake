@@ -5,28 +5,24 @@ find_port(freetype)
 declare_port(
   "https://github.com/harfbuzz/harfbuzz/releases/download/9.0.0/harfbuzz-9.0.0.tar.xz"
   harfbuzz
-  MESON
+  CMAKE
   DEPENDS freetype
   BYPRODUCTS
     lib/libharfbuzz.a
-  ENV
-    "PKG_CONFIG_PATH=${freetype_PREFIX}/lib/pkgconfig"
   ARGS
-    --default-library=static
-    -Dfreetype=enabled
-    -Dglib=disabled
-    -Dgobject=disabled
-    -Dcairo=disabled
-    -Dchafa=disabled
-    -Dicu=disabled
-    -Dgraphite=disabled
-    -Dgraphite2=disabled
-    -Dtests=disabled
-    -Dintrospection=disabled
-    -Ddocs=disabled
-    -Dutilities=disabled
-    -Dbenchmark=disabled
-    -Db_staticpic=true
+    -DBUILD_SHARED_LIBS=OFF
+    -DCMAKE_POSITION_INDEPENDENT_CODE=ON
+    -DHB_HAVE_FREETYPE=ON
+    -DFREETYPE_INCLUDE_DIRS=${freetype_PREFIX}/include;${freetype_PREFIX}/include/freetype2
+    -DFREETYPE_LIBRARY=${freetype_PREFIX}/lib/libfreetype.a
+    -DHB_BUILD_TESTS=OFF
+    -DHB_BUILD_UTILS=OFF
+    -DHB_BUILD_SUBSET=OFF
+    -DHB_HAVE_GLIB=OFF
+    -DHB_HAVE_GOBJECT=OFF
+    -DHB_HAVE_ICU=OFF
+    -DHB_HAVE_GRAPHITE2=OFF
+    -DHB_HAVE_INTROSPECTION=OFF
 )
 
 add_library(harfbuzz STATIC IMPORTED GLOBAL)
