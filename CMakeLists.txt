@@ -210,11 +210,9 @@ ExternalProject_Add(
       -DMPV_SOURCE_COPY=${mpv_source_copy}
       -P "${CMAKE_CURRENT_SOURCE_DIR}/cmake/ports/mpv/copy-source.cmake"
   PATCH_COMMAND
-    ${CMAKE_COMMAND} -E copy_if_different
-      "${CMAKE_CURRENT_SOURCE_DIR}/cmake/ports/mpv/threads-posix-ios.patch"
-      "${mpv_source_copy}/threads-posix-ios.patch"
-    COMMAND
-      patch -p1 --forward --reject-file=- -i "${mpv_source_copy}/threads-posix-ios.patch" || true
+    ${CMAKE_COMMAND}
+      -DFILE=${mpv_source_copy}/osdep/threads-posix.h
+      -P "${CMAKE_CURRENT_SOURCE_DIR}/cmake/ports/mpv/patch-threads-posix.cmake"
   CONFIGURE_COMMAND
     ${CMAKE_COMMAND} -E env ${env} ${meson} setup ${mpv_meson_args}
   BUILD_COMMAND
