@@ -4,24 +4,24 @@ find_port(freetype)
 find_port(fribidi)
 find_port(harfbuzz)
 
-# Build cross-compiler flags for autotools
-set(libass_cc "${CMAKE_C_COMPILER}")
-set(libass_cxx "${CMAKE_CXX_COMPILER}")
+# Build cross-compile CFLAGS — CC must be just the compiler binary,
+# target/sysroot flags go in CFLAGS so autotools/NASM don't get confused
+set(libass_cflags "")
+set(libass_ldflags "")
 
-# Append target triple flags for cross-compilation
 if(CMAKE_C_COMPILER_TARGET)
-  string(APPEND libass_cc " --target=${CMAKE_C_COMPILER_TARGET}")
-  string(APPEND libass_cxx " --target=${CMAKE_CXX_COMPILER_TARGET}")
+  string(APPEND libass_cflags " --target=${CMAKE_C_COMPILER_TARGET}")
+  string(APPEND libass_ldflags " --target=${CMAKE_C_COMPILER_TARGET}")
 endif()
 
 if(CMAKE_SYSROOT)
-  string(APPEND libass_cc " --sysroot=${CMAKE_SYSROOT}")
-  string(APPEND libass_cxx " --sysroot=${CMAKE_SYSROOT}")
+  string(APPEND libass_cflags " --sysroot=${CMAKE_SYSROOT}")
+  string(APPEND libass_ldflags " --sysroot=${CMAKE_SYSROOT}")
 endif()
 
 if(CMAKE_OSX_SYSROOT AND NOT CMAKE_SYSROOT)
-  string(APPEND libass_cc " -isysroot ${CMAKE_OSX_SYSROOT}")
-  string(APPEND libass_cxx " -isysroot ${CMAKE_OSX_SYSROOT}")
+  string(APPEND libass_cflags " -isysroot ${CMAKE_OSX_SYSROOT}")
+  string(APPEND libass_ldflags " -isysroot ${CMAKE_OSX_SYSROOT}")
 endif()
 
 declare_port(
@@ -32,8 +32,10 @@ declare_port(
   BYPRODUCTS
     lib/libass.a
   ENV
-    "CC=${libass_cc}"
-    "CXX=${libass_cxx}"
+    "CC=${CMAKE_C_COMPILER}"
+    "CXX=${CMAKE_CXX_COMPILER}"
+    "CFLAGS=${libass_cflags}"
+    "LDFLAGS=${libass_ldflags}"
     "PKG_CONFIG_PATH=${harfbuzz_PREFIX}/lib/pkgconfig:${fribidi_PREFIX}/lib/pkgconfig:${freetype_PREFIX}/lib/pkgconfig"
     "FREETYPE_CFLAGS=-I${freetype_PREFIX}/include -I${freetype_PREFIX}/include/freetype2"
     "FREETYPE_LIBS=-L${freetype_PREFIX}/lib -lfreetype"
@@ -44,6 +46,7 @@ declare_port(
   ARGS
     --disable-shared
     --enable-static
+    --disable-asm
     --disable-fontconfig
     --disable-require-system-font-provider
     --with-pic
