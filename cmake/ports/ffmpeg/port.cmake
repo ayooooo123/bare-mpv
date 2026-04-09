@@ -23,7 +23,11 @@ set(args
   --disable-doc
   --disable-programs
   --disable-encoders
+  --disable-decoders
   --disable-muxers
+  --disable-demuxers
+  --disable-parsers
+  --disable-bsfs
   --disable-avdevice
   --disable-filters
 
