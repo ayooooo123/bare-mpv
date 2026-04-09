@@ -14,8 +14,10 @@ declare_port(
     -DCMAKE_POSITION_INDEPENDENT_CODE=ON
     -DHB_HAVE_FREETYPE=ON
     -DFREETYPE_INCLUDE_DIR=${freetype_PREFIX}/include/freetype2
+    -DFREETYPE_INCLUDE_DIRS=${freetype_PREFIX}/include/freetype2
     -DFREETYPE_LIBRARY=${freetype_PREFIX}/lib/libfreetype.a
-    -DFreetype_DIR=${freetype_PREFIX}/lib/cmake/freetype
+    -DFREETYPE_LIBRARIES=${freetype_PREFIX}/lib/libfreetype.a
+    -DFREETYPE_FOUND=TRUE
     -DHB_BUILD_TESTS=OFF
     -DHB_BUILD_UTILS=OFF
     -DHB_BUILD_SUBSET=OFF
