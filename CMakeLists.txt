@@ -189,6 +189,7 @@ if(IOS)
     -Dgl-cocoa=disabled
     -Dmacos-cocoa-cb=disabled
     -Dios-gl=auto
+    -Daudiounit=disabled
     -Db_staticpic=true
   )
 endif()
