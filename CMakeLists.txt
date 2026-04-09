@@ -37,6 +37,20 @@ file(MAKE_DIRECTORY "${mpv_prefix}")
 file(MAKE_DIRECTORY "${mpv_build_dir}")
 file(GENERATE OUTPUT "${mpv_build_dir}/cross-file.txt" CONTENT "${cross_file}")
 
+# Supplementary cross-file for ThinLTO: declare lld as linker so meson uses it.
+# Android: NDK ships lld. Linux: CI installs lld alongside clang (see workflow).
+# Darwin/iOS: ld64 has built-in LTO via libLTO.dylib — no extra config needed.
+# Meson merges multiple cross-files — later entries override earlier ones.
+set(mpv_extra_cross_file_args)
+if(ANDROID OR LINUX)
+  if(CMAKE_BUILD_TYPE MATCHES "Release" OR CMAKE_BUILD_TYPE MATCHES "MinSizeRel")
+    file(GENERATE OUTPUT "${mpv_build_dir}/cross-file-lld.txt" CONTENT
+      "[binaries]\nld = 'lld'\n"
+    )
+    list(APPEND mpv_extra_cross_file_args --cross-file "${mpv_build_dir}/cross-file-lld.txt")
+  endif()
+endif()
+
 if(CMAKE_HOST_WIN32)
   find_path(
     msys2
@@ -118,6 +132,7 @@ set(mpv_meson_args
   -Db_ndebug=true
   --prefix "${mpv_prefix}"
   --cross-file "${mpv_build_dir}/cross-file.txt"
+  ${mpv_extra_cross_file_args}
 
   -Dlibmpv=true
   -Dcplayer=false
@@ -195,8 +210,12 @@ if(IOS)
   )
 endif()
 
-if(CMAKE_BUILD_TYPE MATCHES "Release")
+if(CMAKE_BUILD_TYPE MATCHES "Release" OR CMAKE_BUILD_TYPE MATCHES "MinSizeRel")
   # b_strip removed in meson 1.x — stripping handled by install step
+  # LTO: ThinLTO works on Apple (ld64 built-in) and Android (NDK lld).
+  # Linux uses clang+lld in CI (see workflow) so ThinLTO works there too.
+  # ThinLTO is faster to link than full LTO and gives ~80% of the size savings.
+  list(APPEND mpv_meson_args -Db_lto=true -Db_lto_mode=thin)
 endif()
 
 ExternalProject_Add(

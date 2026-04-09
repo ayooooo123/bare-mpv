@@ -130,6 +130,30 @@ elseif(CMAKE_BUILD_TYPE MATCHES "MinSizeRel")
   list(APPEND args --disable-debug --enable-stripping --enable-small)
 endif()
 
+# LTO: enable for Release/MinSizeRel on platforms where it's safe for cross-compile.
+# - Apple (darwin/ios): ld64 has built-in LTO support via libLTO.dylib — always works.
+# - Android: NDK ships lld which supports LTO — always works.
+# - Linux: only if clang is the compiler (gcc LTO needs gcc-ar/gcc-ranlib, fragile).
+#   CI workflow installs clang+lld on Linux runners, so CMAKE_C_COMPILER will be clang.
+if(CMAKE_BUILD_TYPE MATCHES "Release" OR CMAKE_BUILD_TYPE MATCHES "MinSizeRel")
+  set(_do_lto FALSE)
+  if(APPLE OR ANDROID)
+    set(_do_lto TRUE)
+  elseif(LINUX)
+    if(CMAKE_C_COMPILER MATCHES "clang")
+      set(_do_lto TRUE)
+    endif()
+  endif()
+  if(_do_lto)
+    list(APPEND args --enable-lto)
+    # FFmpeg links its own test binaries during configure — make sure it uses lld
+    # on Linux/Android so the LTO plugin is available at link time.
+    if(LINUX OR ANDROID)
+      list(APPEND args --extra-ldflags=-fuse-ld=lld)
+    endif()
+  endif()
+endif()
+
 if(APPLE AND CMAKE_OSX_ARCHITECTURES)
   set(arch ${CMAKE_OSX_ARCHITECTURES})
 elseif(MSVC AND CMAKE_GENERATOR_PLATFORM)
