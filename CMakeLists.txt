@@ -297,20 +297,22 @@ target_link_libraries(${bare_mpv} PRIVATE Threads::Threads)
 # C++17 for modern features
 set_target_properties(${bare_mpv} PROPERTIES CXX_STANDARD 17)
 
-# Strip the final .bare binary in Release builds via a custom target
-# (bare_mpv is an OBJECT library — POST_BUILD not allowed, use add_custom_target instead)
+# Strip the final .bare binary in Release builds
+# Use cmake -P script at install time to avoid generator expression issues with bare module targets
 if(CMAKE_BUILD_TYPE MATCHES "Release" OR CMAKE_BUILD_TYPE MATCHES "MinSizeRel")
   find_program(STRIP_TOOL NAMES llvm-strip strip)
   if(STRIP_TOOL)
     if(APPLE)
-      set(strip_flags --strip-all)
+      set(strip_flags "--strip-all")
     else()
-      set(strip_flags -x)
+      set(strip_flags "-x")
     endif()
-    add_custom_target(strip_bare ALL
-      COMMAND ${STRIP_TOOL} ${strip_flags} $<TARGET_FILE:${bare_mpv}>
-      DEPENDS ${bare_mpv}
-      COMMENT "Stripping debug symbols from $<TARGET_FILE_NAME:${bare_mpv}>"
-    )
+    install(CODE "
+      file(GLOB _bare_files \"${CMAKE_CURRENT_BINARY_DIR}/*.bare\")
+      foreach(_f \${_bare_files})
+        message(STATUS \"Stripping \${_f}\")
+        execute_process(COMMAND ${STRIP_TOOL} ${strip_flags} \${_f})
+      endforeach()
+    ")
   endif()
 endif()
