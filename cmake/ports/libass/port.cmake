@@ -9,6 +9,10 @@ find_port(harfbuzz)
 set(libass_cflags "")
 set(libass_ldflags "")
 
+# Sanitize --host triple: config.sub doesn't understand '-simulator' suffix
+set(libass_host "${CMAKE_C_COMPILER_TARGET}")
+string(REPLACE "-simulator" "" libass_host "${libass_host}")
+
 if(CMAKE_C_COMPILER_TARGET)
   string(APPEND libass_cflags " --target=${CMAKE_C_COMPILER_TARGET}")
   string(APPEND libass_ldflags " --target=${CMAKE_C_COMPILER_TARGET}")
@@ -50,7 +54,7 @@ declare_port(
     --disable-fontconfig
     --disable-require-system-font-provider
     --with-pic
-    --host=${CMAKE_C_COMPILER_TARGET}
+    --host=${libass_host}
 )
 
 add_library(ass STATIC IMPORTED GLOBAL)
