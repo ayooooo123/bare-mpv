@@ -194,7 +194,7 @@ if(IOS)
 endif()
 
 if(CMAKE_BUILD_TYPE MATCHES "Release")
-  list(APPEND mpv_meson_args -Db_strip=true)
+  # b_strip removed in meson 1.x — stripping handled by install step
 endif()
 
 ExternalProject_Add(
