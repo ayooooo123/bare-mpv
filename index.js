@@ -9,6 +9,7 @@ class MpvPlayer {
   constructor() {
     this._handle = binding.create()
     this._renderCtx = null
+    this._renderCtxGL = null
     this._width = 0
     this._height = 0
     this._initialized = false
@@ -172,8 +173,14 @@ class MpvPlayer {
    * @param {number} height - Render height in pixels
    */
   initRender(width, height) {
+    if (this._renderCtxGL) {
+      console.warn('bare-mpv: initRender called while a GL render context exists; freeing the GL context first')
+      binding.renderFreeGL(this._renderCtxGL)
+      this._renderCtxGL = null
+    }
     if (this._renderCtx) {
       binding.renderFree(this._renderCtx)
+      this._renderCtx = null
     }
     this._width = width
     this._height = height
@@ -202,6 +209,65 @@ class MpvPlayer {
   }
 
   /**
+   * Initialize the hardware-accelerated OpenGL renderer.
+   *
+   * The caller is responsible for making their GL context current on the
+   * JS thread before calling this, and for keeping it current for every
+   * subsequent renderFrameGL()/needsRenderGL() call. mpv resolves GL
+   * entry points lazily via the provided callback.
+   *
+   * @param {(name: string) => number | bigint} getProcAddress - Returns
+   *   the address of a GL function as a pointer-valued integer (number
+   *   or bigint). Prefer bigint on 64-bit targets.
+   * @returns {boolean} True if the context was created successfully.
+   */
+  initRenderGL(getProcAddress) {
+    if (typeof getProcAddress !== 'function') {
+      throw new TypeError('initRenderGL: getProcAddress must be a function')
+    }
+    if (this._renderCtx) {
+      console.warn('bare-mpv: initRenderGL called while a software render context exists; freeing the software context first')
+      binding.renderFree(this._renderCtx)
+      this._renderCtx = null
+    }
+    if (this._renderCtxGL) {
+      binding.renderFreeGL(this._renderCtxGL)
+      this._renderCtxGL = null
+    }
+    this._renderCtxGL = binding.renderCreateGL(this._handle, getProcAddress)
+    return this._renderCtxGL !== null
+  }
+
+  /**
+   * Render current frame into a caller-owned OpenGL FBO.
+   *
+   * @param {object} opts
+   * @param {number} opts.fbo - Target FBO name (0 = default framebuffer).
+   * @param {number} opts.width - FBO width in pixels.
+   * @param {number} opts.height - FBO height in pixels.
+   * @param {number} [opts.internalFormat=0x8058] - GL internal format
+   *   (default GL_RGBA8). Pass 0 if unknown.
+   * @param {boolean} [opts.flipY=true] - Flip Y axis (needed for the
+   *   default framebuffer, which has a flipped coordinate system).
+   * @returns {number} mpv status code (0 = success, <0 = error).
+   */
+  renderFrameGL({ fbo, width, height, internalFormat = 0x8058, flipY = true }) {
+    if (!this._renderCtxGL) return -1
+    this._processEvents()
+    return binding.renderFrameGL(this._renderCtxGL, fbo | 0, width | 0, height | 0, internalFormat | 0, !!flipY)
+  }
+
+  /**
+   * Check if a new GL frame is available for rendering.
+   * @returns {boolean}
+   */
+  needsRenderGL() {
+    if (!this._renderCtxGL) return false
+    this._processEvents()
+    return binding.renderUpdateGL(this._renderCtxGL)
+  }
+
+  /**
    * Get the render dimensions
    */
   get renderWidth() {
@@ -219,6 +285,10 @@ class MpvPlayer {
     if (this._renderCtx) {
       binding.renderFree(this._renderCtx)
       this._renderCtx = null
+    }
+    if (this._renderCtxGL) {
+      binding.renderFreeGL(this._renderCtxGL)
+      this._renderCtxGL = null
     }
     if (this._handle) {
       binding.destroy(this._handle)
